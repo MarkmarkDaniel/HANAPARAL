@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "229743059311",
+    "project_id": "hanaparal-a1b9b",
+    "storage_bucket": "hanaparal-a1b9b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:229743059311:android:1fff05dd19c606b36e889a",
+        "android_client_info": {
+          "package_name": "com.example.hanaparal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlpwaVm9uE_sktF6hJuiN2OQIijLTrB2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

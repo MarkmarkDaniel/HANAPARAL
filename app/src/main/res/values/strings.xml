@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">HanapAral</string>
+    <!-- Replace with your Web Client ID from Firebase Console (Project Settings → Your apps → Web app) -->
+    <string name="default_web_client_id" translatable="false">229743059311-2sbadeeiajlaa1lioi305tvgof6v1a4k.apps.googleusercontent.com</string>
+</resources>
