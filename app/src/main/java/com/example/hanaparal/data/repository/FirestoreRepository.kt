@@ -121,7 +121,20 @@ class FirestoreRepository {
         doc.toObject(StudyGroup::class.java)?.copy(id = doc.id)
     }
 
-
+    fun getMyStudyGroups(userId: String): Flow<List<StudyGroup>> = callbackFlow {
+        val listener = studyGroupsCollection.whereArrayContains("memberIds", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val groups = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(StudyGroup::class.java)?.copy(id = doc.id)
+                } ?: emptyList()
+                trySend(groups)
+            }
+        awaitClose { listener.remove() }
+    }
 
     suspend fun updateAnnouncement(groupId: String, announcement: String): Result<Unit> = runCatching {
         studyGroupsCollection.document(groupId).update("announcement", announcement).await()
