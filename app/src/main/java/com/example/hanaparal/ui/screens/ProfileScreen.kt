@@ -90,7 +90,19 @@ fun ProfileScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator()
             } else {
-
+                Button(
+                    onClick = { viewModel.saveProfile(name, course) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Save Profile")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedButton(
+                    onClick = onSuperuser,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Superuser (Biometric)")
+                }
             }
         }
     }
