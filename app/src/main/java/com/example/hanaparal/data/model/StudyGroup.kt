@@ -18,5 +18,8 @@ data class StudyGroup(
     val subject: String = "",
     val announcement: String? = null,
     val reminder: String? = null,
-
+    @ServerTimestamp
+    val createdAt: Date? = null,
+    @ServerTimestamp
+    val updatedAt: Date? = null
 )
