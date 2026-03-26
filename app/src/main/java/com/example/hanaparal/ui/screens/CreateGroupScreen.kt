@@ -97,7 +97,16 @@ fun CreateGroupScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator()
             } else {
-
+                Button(
+                    onClick = {
+                        viewModel.createGroup(
+                            name = name,
+                            description = description,
+                            subject = subject
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("Create Group")
                 }
             }
