@@ -42,4 +42,12 @@ class SuperuserViewModel(
             )
         }
     }
+
+    fun showMessage(msg: String) {
+        _uiState.value = _uiState.value.copy(message = msg)
+    }
+
+    fun clearMessage() {
+        _uiState.value = _uiState.value.copy(message = null)
+    }
 }
