@@ -233,4 +233,22 @@ fun AdminActionButton(text: String, color: Color, modifier: Modifier, onClick: (
     }
 }
 
-
+@Composable
+fun BoardSection(title: String, icon: ImageVector, content: String, color: Color) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(text = title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold, color = color)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = content, style = MaterialTheme.typography.bodyLarge, lineHeight = 24.sp, color = Color(0xFF495057))
+        }
+    }
+}
