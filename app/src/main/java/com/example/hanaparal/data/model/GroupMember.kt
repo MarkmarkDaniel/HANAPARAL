@@ -11,5 +11,6 @@ data class GroupMember(
     val userName: String = "",
     val userEmail: String = "",
     val isAdmin: Boolean = false,
-
+    @ServerTimestamp
+    val joinedAt: Date? = null
 )
