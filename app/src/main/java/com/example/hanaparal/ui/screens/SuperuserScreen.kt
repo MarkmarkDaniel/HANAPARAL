@@ -22,8 +22,11 @@ import com.example.hanaparal.ui.viewmodel.SuperuserViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuperuserScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: SuperuserViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -44,24 +47,35 @@ fun SuperuserScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "Admin Access Locked 🔒",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Please authenticate to view global app configurations.")
+            if (!uiState.isAuthenticated) {
+                Text("Admin Access Locked 🔒", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Please authenticate to view global app configurations.")
+            } else {
+                Text(
+                    text = "Current Remote Config (Global Settings)",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        ConfigItem("Group Creation", if (uiState.groupCreationEnabled) "ENABLED" else "DISABLED")
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        ConfigItem("Global Announcement", uiState.announcementHeader)
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        ConfigItem("Max Group Members", uiState.maxMembersPerGroup.toString())
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { viewModel.loadConfig() }) {
+                    Text("Sync with Cloud")
+                }
+            }
         }
-    }
-}
-
-@Composable
-fun ConfigItem(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = label, fontWeight = FontWeight.SemiBold)
-        Text(text = value, color = MaterialTheme.colorScheme.primary)
     }
 }
