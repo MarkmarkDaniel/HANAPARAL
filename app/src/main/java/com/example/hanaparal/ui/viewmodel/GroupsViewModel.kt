@@ -73,7 +73,20 @@ class GroupsViewModel(
         }
     }
 
+    fun requestToJoin(groupId: String) {
+        viewModelScope.launch {
+            val userId = authRepository.currentUser?.uid ?: return@launch
+            _uiState.update { it.copy(isLoading = true, error = null) }
 
+            firestoreRepository.requestToJoinGroup(groupId, userId)
+                .onSuccess {
+                    _uiState.update { it.copy(isLoading = false, joinRequestSent = true) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(isLoading = false, error = e.message) }
+                }
+        }
+    }
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
