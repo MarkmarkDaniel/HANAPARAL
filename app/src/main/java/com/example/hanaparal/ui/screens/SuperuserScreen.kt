@@ -26,6 +26,58 @@ fun SuperuserScreen(
     viewModel: SuperuserViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    // Helper to find FragmentActivity
+    val activity = remember(context) {
+        var currentContext = context
+        while (currentContext is ContextWrapper) {
+            if (currentContext is FragmentActivity) break
+            currentContext = (currentContext as ContextWrapper).baseContext
+        }
+        currentContext as? FragmentActivity
+    }
+
+    // Function to trigger biometric prompt
+    val promptBiometric = {
+        activity?.let { act ->
+            val executor = ContextCompat.getMainExecutor(act)
+            val biometricPrompt = BiometricPrompt(
+                act,
+                executor,
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                        viewModel.setAuthenticated(true)
+                    }
+                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                        viewModel.showMessage("Security error: $errString")
+                    }
+                    override fun onAuthenticationFailed() {
+                        viewModel.showMessage("Authentication failed. Try again.")
+                    }
+                }
+            )
+
+            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Superuser Authentication")
+                .setSubtitle("Authenticate using Fingerprint, Face, or PIN.")
+                .setAllowedAuthenticators(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
+                .build()
+
+            biometricPrompt.authenticate(promptInfo)
+        }
+    }
+
+    // Automatically show biometric prompt
+    LaunchedEffect(Unit) {
+        val biometricManager = BiometricManager.from(context)
+        val canAuth = biometricManager.canAuthenticate(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
+        if (canAuth == BiometricManager.BIOMETRIC_SUCCESS) {
+            promptBiometric()
+        } else {
+            viewModel.showMessage("Biometric or Screen Lock not set up.")
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -51,6 +103,10 @@ fun SuperuserScreen(
                 Text("Admin Access Locked 🔒", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Please authenticate to view global app configurations.")
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(onClick = { promptBiometric() }) {
+                    Text("Unlock with Biometrics")
+                }
             } else {
                 Text(
                     text = "Current Remote Config (Global Settings)",
@@ -77,5 +133,16 @@ fun SuperuserScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ConfigItem(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, fontWeight = FontWeight.SemiBold)
+        Text(text = value, color = MaterialTheme.colorScheme.primary)
     }
 }
