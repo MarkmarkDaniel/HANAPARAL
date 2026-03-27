@@ -1,33 +1,28 @@
 package com.example.hanaparal.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hanaparal.ui.viewmodel.ProfileViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onProfileComplete: () -> Unit,
@@ -56,54 +51,139 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Student Profile", fontWeight = FontWeight.Bold) },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Student Profile", style = androidx.compose.material3.MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(24.dp))
-            TextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Name") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Profile Avatar Placeholder
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(60.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
-            TextField(
-                value = course,
-                onValueChange = { course = it },
-                label = { Text("Course / Program") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
-                text = "Email: ${uiState.profile?.email ?: ""}",
-                style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+                text = uiState.profile?.email ?: "No Email Provided",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(24.dp))
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Form Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    ProfileTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = "Full Name",
+                        icon = Icons.Default.Badge
+                    )
+
+                    ProfileTextField(
+                        value = course,
+                        onValueChange = { course = it },
+                        label = "Course / Program",
+                        icon = Icons.Default.School
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
             if (uiState.isLoading) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(modifier = Modifier.padding(16.dp))
             } else {
                 Button(
                     onClick = { viewModel.saveProfile(name, course) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Save Profile")
+                    Text("Save Changes", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 OutlinedButton(
                     onClick = onSuperuser,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
-                    Text("Superuser (Biometric)")
+                    Icon(Icons.Default.Security, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Superuser Access", fontSize = 16.sp)
                 }
             }
+            Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+}
+
+@Composable
+fun ProfileTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    icon: ImageVector
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Medium
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            leadingIcon = { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant
+            )
+        )
     }
 }
