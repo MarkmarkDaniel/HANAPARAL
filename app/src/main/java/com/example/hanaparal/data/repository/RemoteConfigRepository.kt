@@ -1,5 +1,7 @@
 package com.example.hanaparal.data.repository
 
+import android.util.Log
+import kotlinx.coroutines.tasks.await
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.example.hanaparal.data.model.RemoteConfigValues
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
@@ -57,5 +59,14 @@ class RemoteConfigRepository private constructor() {
         )
 
         _configFlow.value = newValues
+    }
+
+    suspend fun fetchAndActivate(): Boolean {
+        val success = remoteConfig.fetchAndActivate().await()
+        if (success) {
+            updateConfig()
+            Log.d("RemoteConfig", "Config updated successfully")
+        }
+        return success
     }
 }
