@@ -46,4 +46,16 @@ class RemoteConfigRepository private constructor() {
 
         updateConfig()
     }
+
+    fun updateConfig() {
+        val newValues = RemoteConfigValues(
+            groupCreationEnabled = remoteConfig.getBoolean("group_creation_enabled"),
+            announcementHeader = remoteConfig.getString("announcement_header")
+                .takeIf { it.isNotEmpty() } ?: "Welcome!",
+            maxMembersPerGroup = remoteConfig.getLong("max_members_per_group")
+                .takeIf { it > 0 } ?: 20L
+        )
+
+        _configFlow.value = newValues
+    }
 }
