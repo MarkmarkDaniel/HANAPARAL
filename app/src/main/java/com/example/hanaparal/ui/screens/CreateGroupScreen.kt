@@ -1,31 +1,23 @@
 package com.example.hanaparal.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hanaparal.ui.viewmodel.CreateGroupViewModel
 
@@ -41,6 +33,7 @@ fun CreateGroupScreen(
     var description by remember { mutableStateOf("") }
     var subject by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(uiState.isCreated, uiState.createdGroupId) {
         val groupId = uiState.createdGroupId
@@ -55,47 +48,79 @@ fun CreateGroupScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text("Create Study Group") },
+            CenterAlignedTopAppBar(
+                title = { Text("Create Study Group", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    Button(onClick = onBack) { Text("Back") }
-                }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .background(MaterialTheme.colorScheme.surface)
+                .verticalScroll(scrollState)
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Group Name") },
-                modifier = Modifier.fillMaxWidth()
+            Text(
+                text = "Set up your group details to start collaborating with other students.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 32.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            TextField(
-                value = subject,
-                onValueChange = { subject = it },
-                label = { Text("Subject") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            TextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Description") },
+
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                minLines = 3
-            )
-            Spacer(modifier = Modifier.height(24.dp))
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    CreateGroupTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = "Group Name",
+                        placeholder = "e.g. Physics Study Hub",
+                        icon = Icons.Default.Groups
+                    )
+
+                    CreateGroupTextField(
+                        value = subject,
+                        onValueChange = { subject = it },
+                        label = "Subject",
+                        placeholder = "e.g. PHYC 101",
+                        icon = Icons.Default.Book
+                    )
+
+                    CreateGroupTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = "Description",
+                        placeholder = "What is this group about?",
+                        icon = Icons.Default.Description,
+                        minLines = 3
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
             if (uiState.isLoading) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             } else {
                 Button(
                     onClick = {
@@ -105,11 +130,51 @@ fun CreateGroupScreen(
                             subject = subject
                         )
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    enabled = name.isNotBlank() && subject.isNotBlank()
                 ) {
-                    Text("Create Group")
+                    Text("Create Group", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
+            
+            Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+}
+
+@Composable
+fun CreateGroupTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    icon: ImageVector,
+    minLines: Int = 1
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)) },
+            shape = RoundedCornerShape(12.dp),
+            leadingIcon = { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            minLines = minLines,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant
+            )
+        )
     }
 }
