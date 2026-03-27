@@ -2,6 +2,7 @@ package com.example.hanaparal.data.repository
 
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.example.hanaparal.data.model.RemoteConfigValues
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -25,5 +26,24 @@ class RemoteConfigRepository private constructor() {
         fun get(): RemoteConfigRepository = instance ?: synchronized(this) {
             instance ?: RemoteConfigRepository().also { instance = it }
         }
+    }
+
+
+    init {
+        val configSettings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = 0
+        }
+
+        remoteConfig.setConfigSettingsAsync(configSettings)
+
+        remoteConfig.setDefaultsAsync(
+            mapOf(
+                "group_creation_enabled" to true,
+                "announcement_header" to "Welcome!",
+                "max_members_per_group" to 20L
+            )
+        )
+
+        updateConfig()
     }
 }
