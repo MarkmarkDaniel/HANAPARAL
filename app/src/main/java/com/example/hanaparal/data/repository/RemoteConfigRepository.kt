@@ -69,4 +69,8 @@ class RemoteConfigRepository private constructor() {
         }
         return success
     }
+
+    fun getConfig(): RemoteConfigValues {
+        return _configFlow.value
+    }
 }
